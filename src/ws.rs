@@ -208,13 +208,14 @@ pub async fn login_handler(
     }
 
     let token = pw_auth.create_session_token(&body.username);
+    let max_age = pw_auth.session_duration_secs();
     info!(user = %mask_username(&body.username), "login successful");
 
     Response::builder()
         .status(StatusCode::OK)
         .header(
             "Set-Cookie",
-            format!("tmw_session={token}; HttpOnly; SameSite=Strict; Path=/; Max-Age=86400"),
+            format!("tmw_session={token}; HttpOnly; SameSite=Strict; Path=/; Max-Age={max_age}"),
         )
         .header("Content-Type", "application/json")
         .body(axum::body::Body::from(r#"{"ok":true}"#))

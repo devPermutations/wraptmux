@@ -57,7 +57,7 @@ async fn main() {
         }
         AuthMode::Password => {
             info!("password auth mode — HMAC session key generated");
-            AuthProvider::Password(PasswordAuth::new())
+            AuthProvider::Password(PasswordAuth::new(config.terminal.session_duration_secs))
         }
     };
 

@@ -9,6 +9,7 @@ jwks_refresh_secs = 3600
 
 [terminal]
 ping_interval_secs = 30
+# session_duration_secs = 86400  # session cookie lifetime (default: 24h)
 
 [[users]]
 email = "user@example.com"

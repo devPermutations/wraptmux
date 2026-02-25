@@ -4,19 +4,22 @@ use std::time::{SystemTime, UNIX_EPOCH};
 
 type HmacSha256 = Hmac<Sha256>;
 
-const SESSION_DURATION_SECS: u64 = 86400; // 24 hours
-
 #[derive(Clone)]
 pub struct PasswordAuth {
     hmac_key: Vec<u8>,
+    session_duration_secs: u64,
 }
 
 impl PasswordAuth {
-    pub fn new() -> Self {
+    pub fn new(session_duration_secs: u64) -> Self {
         use rand::RngCore;
         let mut key = vec![0u8; 32];
         rand::rng().fill_bytes(&mut key);
-        Self { hmac_key: key }
+        Self { hmac_key: key, session_duration_secs }
+    }
+
+    pub fn session_duration_secs(&self) -> u64 {
+        self.session_duration_secs
     }
 
     pub fn verify_password(hash: &str, password: &str) -> Result<bool, bcrypt::BcryptError> {
@@ -28,7 +31,7 @@ impl PasswordAuth {
             .duration_since(UNIX_EPOCH)
             .unwrap()
             .as_secs()
-            + SESSION_DURATION_SECS;
+            + self.session_duration_secs;
 
         let payload = format!("{username}:{expiry}");
         let mut mac = HmacSha256::new_from_slice(&self.hmac_key).unwrap();

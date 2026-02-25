@@ -29,9 +29,15 @@ pub struct CloudflareConfig {
     pub jwks_refresh_secs: u64,
 }
 
+fn default_session_duration_secs() -> u64 {
+    86400
+}
+
 #[derive(Debug, Deserialize)]
 pub struct TerminalConfig {
     pub ping_interval_secs: u64,
+    #[serde(default = "default_session_duration_secs")]
+    pub session_duration_secs: u64,
 }
 
 #[derive(Debug, Clone, Deserialize)]

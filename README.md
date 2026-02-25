@@ -191,6 +191,7 @@ WARN password auth on 0.0.0.0 without TLS — credentials will be sent in plaint
 | Field | Description | Default |
 |-------|-------------|---------|
 | `ping_interval_secs` | WebSocket keepalive interval | `30` |
+| `session_duration_secs` | Session cookie lifetime in seconds (password mode) | `86400` (24h) |
 
 ### `[cloudflare]` (required when `auth_mode = "cloudflare"`)
 

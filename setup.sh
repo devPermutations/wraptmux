@@ -104,29 +104,13 @@ generate_password_config() {
         fi
 
         if [ "$DEPLOY" = "docker" ]; then
-            # Use docker to hash
-            HASH=$(echo "$PASSWORD" | docker run --rm -i rust:1.93-bookworm bash -c '
-                cargo init --name hasher /tmp/h 2>/dev/null
-                cd /tmp/h
-                echo "bcrypt = \"0.17\"" >> Cargo.toml
-                cat > src/main.rs <<INNER
-use std::io::Read;
-fn main() {
-    let mut pw = String::new();
-    std::io::stdin().read_to_string(&mut pw).unwrap();
-    let pw = pw.trim();
-    println!("{}", bcrypt::hash(pw, 12).unwrap());
-}
-INNER
-                cargo run --quiet 2>/dev/null
-            ' 2>/dev/null)
-
-            if [ -z "$HASH" ] || [[ ! "$HASH" == \$2* ]]; then
-                # Fallback: build wraptmux first, then use it
-                info "Building wraptmux to hash password..."
-                docker compose build --quiet 2>/dev/null
-                HASH=$(echo "$PASSWORD" | docker compose run --rm -T wraptmux /opt/wraptmux/wraptmux hash-password 2>/dev/null)
+            # Build image first (if not already built), then use it to hash
+            if ! docker image inspect wraptmux-wraptmux &>/dev/null && \
+               ! docker image inspect tmuxwrapper-wraptmux &>/dev/null; then
+                info "Building wraptmux image (first time only)..."
+                docker compose build --quiet
             fi
+            HASH=$(echo "$PASSWORD" | docker compose run --rm -T wraptmux /opt/wraptmux/wraptmux hash-password 2>/dev/null)
         else
             # Bare metal — build if needed, then hash
             if [ ! -f "target/release/wraptmux" ]; then
