@@ -1,0 +1,6 @@
+# Replace terminal.example.com with your actual domain.
+# Caddy will automatically obtain a TLS certificate from Let's Encrypt.
+
+terminal.example.com {
+	reverse_proxy wraptmux:7681
+}

@@ -1,0 +1,49 @@
+# TLS-enabled deployment using Caddy as a reverse proxy.
+# Caddy automatically obtains and renews Let's Encrypt certificates.
+#
+# Usage:
+#   1. Set your domain below (replace terminal.example.com)
+#   2. Ensure ports 80 and 443 are open and the domain points to this server
+#   3. docker compose -f docker-compose.tls.yml up -d
+#
+# Caddy will automatically:
+#   - Obtain a Let's Encrypt TLS certificate for your domain
+#   - Renew it before expiry
+#   - Redirect HTTP → HTTPS
+#   - Proxy WebSocket connections to wraptmux
+
+services:
+  wraptmux:
+    build: .
+    volumes:
+      - ./config.toml:/data/config.toml:ro
+      - wraptmux-homes:/home
+      - wraptmux-tmp:/tmp
+    cap_drop: [ALL]
+    cap_add: [SETUID, SETGID, DAC_OVERRIDE, FOWNER, CHOWN, FSETID]
+    restart: unless-stopped
+    # No ports exposed — only accessible through Caddy
+    networks:
+      - internal
+
+  caddy:
+    image: caddy:2-alpine
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy-data:/data
+      - caddy-config:/config
+    networks:
+      - internal
+    restart: unless-stopped
+
+volumes:
+  wraptmux-homes:
+  wraptmux-tmp:
+  caddy-data:
+  caddy-config:
+
+networks:
+  internal:
