@@ -246,10 +246,13 @@ else
         fi
     done
 
-    # Sudoers
-    sudo tee /etc/sudoers.d/wraptmux > /dev/null <<'SUDOERS'
-root ALL=(ALL) NOPASSWD: /usr/bin/tmux
-SUDOERS
+    # Sudoers — scope to only configured unix users
+    sudo sh -c '> /etc/sudoers.d/wraptmux'
+    grep -E '^\s*unix_user\s*=' "$CONFIG_FILE" | sed 's/.*=\s*"\?\([^"]*\)"\?.*/\1/' | while read -r user; do
+        user=$(echo "$user" | xargs)
+        [ -z "$user" ] && continue
+        echo "root ALL=($user) NOPASSWD: /usr/bin/tmux" | sudo tee -a /etc/sudoers.d/wraptmux > /dev/null
+    done
     sudo chmod 440 /etc/sudoers.d/wraptmux
 
     # Systemd service

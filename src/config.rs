@@ -98,6 +98,14 @@ impl Config {
                             user.unix_user
                         ));
                     }
+                    if let Some(ref username) = user.username {
+                        if !username.chars().all(|c| c.is_alphanumeric() || c == '_' || c == '-') {
+                            return Err(format!(
+                                "username '{}' contains invalid characters (only [a-zA-Z0-9_-] allowed)",
+                                username
+                            ));
+                        }
+                    }
                     if user.password_hash.is_none() || user.password_hash.as_ref().is_some_and(|h| h.is_empty()) {
                         return Err(format!(
                             "user '{}' is missing 'password_hash' (required in password mode)",

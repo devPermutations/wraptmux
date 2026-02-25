@@ -162,12 +162,30 @@ pub struct LoginRequest {
 
 pub async fn login_handler(
     State(state): State<Arc<AppState>>,
+    headers: HeaderMap,
     Json(body): Json<LoginRequest>,
 ) -> Response {
     let pw_auth = match &state.auth {
         AuthProvider::Password(pw) => pw,
         AuthProvider::Cloudflare(_) => return StatusCode::NOT_FOUND.into_response(),
     };
+
+    // Origin check — reject cross-origin login attempts
+    if let Some(origin) = headers.get("origin").and_then(|v| v.to_str().ok()) {
+        let host = headers.get("host").and_then(|v| v.to_str().ok()).unwrap_or("");
+        let origin_host = origin
+            .strip_prefix("https://")
+            .or_else(|| origin.strip_prefix("http://"))
+            .unwrap_or(origin)
+            .split(':')
+            .next()
+            .unwrap_or("");
+        let host_name = host.split(':').next().unwrap_or("");
+        if origin_host != host_name {
+            warn!(origin = %origin, "rejected login: origin mismatch");
+            return StatusCode::FORBIDDEN.into_response();
+        }
+    }
 
     let user = match state.config.find_user_by_username(&body.username) {
         Some(u) => u.clone(),
@@ -215,7 +233,7 @@ pub async fn login_handler(
         .status(StatusCode::OK)
         .header(
             "Set-Cookie",
-            format!("tmw_session={token}; HttpOnly; SameSite=Strict; Path=/; Max-Age={max_age}"),
+            format!("tmw_session={token}; HttpOnly; Secure; SameSite=Strict; Path=/; Max-Age={max_age}"),
         )
         .header("Content-Type", "application/json")
         .body(axum::body::Body::from(r#"{"ok":true}"#))
@@ -320,7 +338,16 @@ pub async fn ws_handler(
     if matches!(state.config.parsed_auth_mode(), Ok(AuthMode::Cloudflare)) {
         if let Some(origin) = headers.get("origin").and_then(|v| v.to_str().ok()) {
             let host = headers.get("host").and_then(|v| v.to_str().ok()).unwrap_or("");
-            if !origin.ends_with(host) {
+            // Extract hostname only (strip scheme and port) for exact comparison
+            let origin_host = origin
+                .strip_prefix("https://")
+                .or_else(|| origin.strip_prefix("http://"))
+                .unwrap_or(origin)
+                .split(':')
+                .next()
+                .unwrap_or("");
+            let host_name = host.split(':').next().unwrap_or("");
+            if origin_host != host_name {
                 warn!(origin = %origin, host = %host, "rejected WebSocket: origin mismatch");
                 return StatusCode::FORBIDDEN.into_response();
             }
