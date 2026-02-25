@@ -1,0 +1,11 @@
+target/
+.git/
+.claude/
+.playwright-mcp/
+*.pdf
+*.md
+config.toml
+docker-compose.yml
+.dockerignore
+.gitignore
+.env

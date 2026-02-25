@@ -1,0 +1,28 @@
+[Unit]
+Description=wraptmux — web terminal
+After=network.target
+
+[Service]
+Type=simple
+ExecStart=/opt/wraptmux/wraptmux /opt/wraptmux/config.toml
+WorkingDirectory=/opt/wraptmux
+Restart=on-failure
+RestartSec=3
+
+# Needs root to setuid/setgid into target users
+User=root
+Group=root
+
+# Hardening
+NoNewPrivileges=no
+ProtectSystem=strict
+ReadWritePaths=/tmp /home
+PrivateTmp=false
+CapabilityBoundingSet=CAP_SETUID CAP_SETGID CAP_DAC_OVERRIDE CAP_FOWNER
+ProtectKernelTunables=yes
+ProtectKernelModules=yes
+ProtectControlGroups=yes
+RestrictNamespaces=yes
+
+[Install]
+WantedBy=multi-user.target

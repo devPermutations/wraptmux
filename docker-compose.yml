@@ -1,0 +1,17 @@
+services:
+  wraptmux:
+    build: .
+    ports:
+      - "7681:7681"
+    volumes:
+      - ./config.toml:/data/config.toml:ro
+      - wraptmux-homes:/home
+      - wraptmux-tmp:/tmp
+    cap_drop: [ALL]
+    cap_add: [SETUID, SETGID, DAC_OVERRIDE, FOWNER]
+    stop_grace_period: 10s
+    restart: unless-stopped
+
+volumes:
+  wraptmux-homes:
+  wraptmux-tmp:
