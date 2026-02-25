@@ -26,4 +26,5 @@ root ALL=(ALL) NOPASSWD: /usr/bin/tmux
 EOF
 chmod 440 /etc/sudoers.d/wraptmux
 
+cd /opt/wraptmux
 exec /opt/wraptmux/wraptmux "$CONFIG"

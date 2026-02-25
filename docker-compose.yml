@@ -8,7 +8,7 @@ services:
       - wraptmux-homes:/home
       - wraptmux-tmp:/tmp
     cap_drop: [ALL]
-    cap_add: [SETUID, SETGID, DAC_OVERRIDE, FOWNER]
+    cap_add: [SETUID, SETGID, DAC_OVERRIDE, FOWNER, CHOWN, FSETID]
     stop_grace_period: 10s
     restart: unless-stopped
 
