@@ -2,7 +2,11 @@
 
 Web-based tmux terminal — access your server from any browser.
 
-<!-- ![screenshot](screenshot.png) -->
+<p align="center">
+  <img src="screenshots/main.jpg" width="250" alt="Session picker">
+  <img src="screenshots/root.jpg" width="250" alt="Terminal session">
+  <img src="screenshots/claude.jpg" width="250" alt="Claude Code on mobile">
+</p>
 
 ## Features
 
@@ -224,9 +228,11 @@ wraptmux hash-password
 docker compose run --rm wraptmux /opt/wraptmux/wraptmux hash-password
 ```
 
-### Cloudflare Access
+### Cloudflare Access (recommended)
 
 Zero-trust authentication via [Cloudflare Access](https://developers.cloudflare.com/cloudflare-one/applications/). wraptmux validates the JWT from Cloudflare's `Cf-Access-Jwt-Assertion` header. No passwords stored — user identity comes from Cloudflare.
+
+This is the recommended auth mode. Cloudflare Access gives you TLS, DDoS protection, identity provider integration (Google, GitHub, etc.), and device posture checks — all without running your own reverse proxy or managing certificates.
 
 Requires:
 1. A Cloudflare Access application configured for your domain
@@ -246,6 +252,10 @@ Requires:
 ## Contributing
 
 Contributions are welcome. Please open an issue first to discuss what you'd like to change.
+
+## Disclaimer
+
+This project was vibe-coded with [Claude Code](https://claude.ai/claude-code). It works well for the author's use case but has not been formally audited. **Use at your own risk.** If you're exposing a terminal to the internet, please understand the security implications and use Cloudflare Access or TLS at minimum.
 
 ## License
 
