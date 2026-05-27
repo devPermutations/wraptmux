@@ -1,5 +1,9 @@
 # wraptmux
 
+> **Deprecated — superseded by [tmux-wrapper](https://github.com/devPermutations/tmux-wrapper).**
+>
+> This repo's dual-auth (password + Cloudflare Access) and Docker packaging proved confusing in practice. The successor strips it to one auth path (Cloudflare Access only), one transport (127.0.0.1, no local TLS), and one artifact (single Rust binary + systemd unit). Go there for the maintained version.
+
 Web-based tmux terminal — access your server from any browser.
 
 <p align="center">
